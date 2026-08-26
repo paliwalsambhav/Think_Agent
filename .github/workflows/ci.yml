@@ -1,0 +1,37 @@
+﻿name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint (errors only)
+        run: |
+          pip install ruff
+          ruff check . --select=E9,F821
+
+      - name: Import smoke test
+        run: |
+          python -c "import agent.graph"
+          python -c "import agent.llm"
+          python -c "import agent.tools"
+          python -c "import agent.state"
+          python -c "import memory.store"
+          python -c "import tracer.trace"
+          python -c "import tracer.db"
+          python -c "import main"
